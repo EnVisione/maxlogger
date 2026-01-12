@@ -30,6 +30,7 @@ public final class ConfigHolder {
         public final ForgeConfigSpec.BooleanValue logFailedCommands;
         public final ForgeConfigSpec.LongValue logRotationBytes;
         public final ForgeConfigSpec.IntValue whitelistBackupKeep;
+        public final ForgeConfigSpec.IntValue commandHistorySize;
 
         Common(ForgeConfigSpec.Builder builder) {
             builder.push("general");
@@ -51,6 +52,7 @@ public final class ConfigHolder {
             logFailedCommands = builder.define("logFailedCommands", true);
             logRotationBytes = builder.comment("Rotate log when reaching size in bytes").defineInRange("logRotationBytes", 5_000_000L, 100_000L, 100_000_000L);
             whitelistBackupKeep = builder.comment("How many whitelist backups to keep").defineInRange("whitelistBackupKeep", 5, 1, 20);
+            commandHistorySize = builder.comment("How many recent commands to keep in memory for /logger view/search").defineInRange("commandHistorySize", 5000, 100, 20000);
             builder.pop();
         }
     }

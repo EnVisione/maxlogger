@@ -35,6 +35,10 @@ public class LogWriter {
         queue.offer("[" + ts + "] " + line + System.lineSeparator());
     }
 
+    public void flushLatest() {
+        sessionManager.updateLatest();
+    }
+
     private void runWriter() {
         while (true) {
             try {

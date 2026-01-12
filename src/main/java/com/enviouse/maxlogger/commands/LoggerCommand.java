@@ -23,6 +23,12 @@ public class LoggerCommand {
                         .then(Commands.literal("list").executes(ctx -> list(ctx.getSource()))))
                 .then(Commands.literal("stats").executes(ctx -> stats(ctx.getSource())))
                 .then(Commands.literal("session").executes(ctx -> session(ctx.getSource())))
+                .then(Commands.literal("view").then(Commands.argument("player", StringArgumentType.word()).executes(ctx -> view(ctx.getSource(), StringArgumentType.getString(ctx, "player")))))
+                .then(Commands.literal("search").then(Commands.argument("command", StringArgumentType.greedyString()).executes(ctx -> search(ctx.getSource(), StringArgumentType.getString(ctx, "command")))))
+                .then(Commands.literal("spyfilter")
+                        .then(Commands.literal("add").then(Commands.argument("term", StringArgumentType.greedyString()).executes(ctx -> spyFilterAdd(ctx.getSource(), StringArgumentType.getString(ctx, "term")))))
+                        .then(Commands.literal("remove").then(Commands.argument("term", StringArgumentType.greedyString()).executes(ctx -> spyFilterRemove(ctx.getSource(), StringArgumentType.getString(ctx, "term")))))
+                        .then(Commands.literal("list").executes(ctx -> spyFilterList(ctx.getSource()))))
                 .then(Commands.literal("help").executes(ctx -> help(ctx.getSource())))
         );
     }
@@ -81,8 +87,57 @@ public class LoggerCommand {
         return 1;
     }
 
+    private static int view(CommandSourceStack src, String input) {
+        return PlayerResolver.resolve(src, input).map(resolved -> {
+            CommandLogger logger = MaxLogger.get().getCommandLogger();
+            var lines = logger.viewPlayer(resolved.id());
+            if (lines.isEmpty()) {
+                src.sendSuccess(() -> TextUtils.info("No commands for " + resolved.name()), false);
+            } else {
+                lines.forEach(line -> src.sendSuccess(() -> TextUtils.info(line), false));
+            }
+            return lines.size();
+        }).orElseGet(() -> {
+            src.sendFailure(TextUtils.error("Player not found"));
+            return 0;
+        });
+    }
+
+    private static int search(CommandSourceStack src, String needle) {
+        CommandLogger logger = MaxLogger.get().getCommandLogger();
+        var lines = logger.searchCommand(needle);
+        if (lines.isEmpty()) {
+            src.sendSuccess(() -> TextUtils.info("No matches"), false);
+        } else {
+            lines.forEach(line -> src.sendSuccess(() -> TextUtils.info(line), false));
+        }
+        return lines.size();
+    }
+
+    private static int spyFilterAdd(CommandSourceStack src, String term) {
+        boolean added = MaxLogger.get().getCommandLogger().spyFilterAdd(term);
+        src.sendSuccess(() -> TextUtils.success((added ? "Added" : "Already present") + " filter: " + term), false);
+        return added ? 1 : 0;
+    }
+
+    private static int spyFilterRemove(CommandSourceStack src, String term) {
+        boolean removed = MaxLogger.get().getCommandLogger().spyFilterRemove(term);
+        src.sendSuccess(() -> TextUtils.success((removed ? "Removed" : "Not present") + " filter: " + term), false);
+        return removed ? 1 : 0;
+    }
+
+    private static int spyFilterList(CommandSourceStack src) {
+        var filters = MaxLogger.get().getCommandLogger().spyFilterList();
+        if (filters.isEmpty()) {
+            src.sendSuccess(() -> TextUtils.info("No spy filters"), false);
+        } else {
+            filters.forEach(f -> src.sendSuccess(() -> TextUtils.info(f), false));
+        }
+        return filters.size();
+    }
+
     private static int help(CommandSourceStack src) {
-        src.sendSuccess(() -> TextUtils.info("/logger spy | /logger whitelist add|remove|list | /logger stats | /logger session"), false);
+        src.sendSuccess(() -> TextUtils.info("/logger spy | /logger whitelist add|remove|list | /logger stats | /logger session | /logger view <player> | /logger search <command> | /logger spyfilter add|remove|list"), false);
         return 1;
     }
 }

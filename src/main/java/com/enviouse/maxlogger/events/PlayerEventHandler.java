@@ -23,7 +23,7 @@ public class PlayerEventHandler {
         if (event.getEntity() instanceof net.minecraft.server.level.ServerPlayer player) {
             scheduler.onJoin(player);
             spyManager.load(player);
-            commandLogger.logJoinLeave(player, true);
+            commandLogger.logJoin(player);
         }
     }
 
@@ -31,7 +31,7 @@ public class PlayerEventHandler {
     public void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         if (event.getEntity() instanceof net.minecraft.server.level.ServerPlayer player) {
             scheduler.onLeave(player);
-            commandLogger.logJoinLeave(player, false);
+            commandLogger.logLeave(player);
         }
     }
 }
