@@ -24,6 +24,8 @@ $env:JAVA_HOME="C:\\path\\to\\jdk17"
 ./gradlew.bat --no-daemon jar
 ```
 
+Detailed architecture, verification, and maintenance guidance is available in [the documentation index](docs/README.md).
+
 ## Runtime paths
 - Config: `config/anticheat/`
 - Logs: `anticheat/logs/` (configurable)
